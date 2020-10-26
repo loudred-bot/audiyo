@@ -3,11 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		9C0C8DBD253EA87100E40EDA /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C0C8DBC253EA87100E40EDA /* main.swift */; };
+		9C0C8DC6253EAA3300E40EDA /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0C8DC5253EAA3300E40EDA /* ArgumentParser */; };
+		9C0C8DC9253F97C900E40EDA /* AudioDevices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C0C8DC8253F97C900E40EDA /* AudioDevices.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,7 @@
 /* Begin PBXFileReference section */
 		9C0C8DB9253EA87100E40EDA /* SwitchAudioDevice */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwitchAudioDevice; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C0C8DBC253EA87100E40EDA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		9C0C8DC8253F97C900E40EDA /* AudioDevices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDevices.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9C0C8DC6253EAA3300E40EDA /* ArgumentParser in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				9C0C8DBC253EA87100E40EDA /* main.swift */,
+				9C0C8DC8253F97C900E40EDA /* AudioDevices.swift */,
 			);
 			path = SwitchAudioDevice;
 			sourceTree = "<group>";
@@ -78,6 +83,9 @@
 			dependencies = (
 			);
 			name = SwitchAudioDevice;
+			packageProductDependencies = (
+				9C0C8DC5253EAA3300E40EDA /* ArgumentParser */,
+			);
 			productName = SwitchAudioDevice;
 			productReference = 9C0C8DB9253EA87100E40EDA /* SwitchAudioDevice */;
 			productType = "com.apple.product-type.tool";
@@ -105,6 +113,9 @@
 				Base,
 			);
 			mainGroup = 9C0C8DB0253EA87100E40EDA;
+			packageReferences = (
+				9C0C8DC4253EAA3300E40EDA /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+			);
 			productRefGroup = 9C0C8DBA253EA87100E40EDA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -119,6 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9C0C8DC9253F97C900E40EDA /* AudioDevices.swift in Sources */,
 				9C0C8DBD253EA87100E40EDA /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -281,6 +293,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9C0C8DC4253EAA3300E40EDA /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9C0C8DC5253EAA3300E40EDA /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9C0C8DC4253EAA3300E40EDA /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9C0C8DB1253EA87100E40EDA /* Project object */;
 }
