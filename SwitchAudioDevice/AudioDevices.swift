@@ -57,15 +57,59 @@ struct Device {
 }
 
 class AudioDeviceManager {
-//    var devices: [AudioDeviceID] = []
-    
+
     private var deviceList: [Device] = []
-    
+    private var currentInputDeviceID: AudioDeviceID? = nil
+    private var currentOutputDeviceID: AudioDeviceID? = nil
+    private var currentSystemOutputDeviceID: AudioDeviceID? = nil
+
     var devices: [Device] {
         return self.deviceList
     }
+    var inputDevices: [Device] {
+        return self.devices.filter {
+            $0.input
+        }
+    }
+    var outputDevices: [Device] {
+        return self.devices.filter {
+            $0.output
+        }
+    }
+    
+    var currentInputDevice: Device? {
+        guard currentInputDeviceID != nil else {
+            return nil
+        }
+        let device = deviceList.first(where: { $0.id == currentInputDeviceID })
+        return device
+    }
+    var currentOutputDevice: Device? {
+        guard currentOutputDeviceID != nil else {
+            return nil
+        }
+        let device = deviceList.first(where: { $0.id == currentOutputDeviceID })
+        return device
+    }
+    var currentSystemOutputDevice: Device? {
+        guard currentSystemOutputDeviceID != nil else {
+            return nil
+        }
+        let device = deviceList.first(where: { $0.id == currentSystemOutputDeviceID })
+        return device
+    }
     
     init() {
+        // get the current input device
+        guard let curInDevice = self.getCurrentInputDevice() else {
+            return
+        }
+        guard let curOutDevice = self.getCurrentOutputDevice() else {
+            return
+        }
+        guard let curSystemOutDevice = self.getCurrentSystemOutputDevice() else {
+            return
+        }
         // create a list of audio devices
         guard let devices = self.getDevices() else {
             return
@@ -82,6 +126,9 @@ class AudioDeviceManager {
             }
             deviceList.append(Device(id: deviceID, name: name, input: isInputDevice, output: isOutputDevice))
         }
+        currentInputDeviceID = curInDevice
+        currentOutputDeviceID = curOutDevice
+        currentSystemOutputDeviceID = curSystemOutDevice
     }
     
     // get the IDs of all the Audio Devices
@@ -104,6 +151,7 @@ class AudioDeviceManager {
     }
     
     // get the name of a device
+    
     private func getDeviceName(id: AudioDeviceID) -> String? {
         // determine if the device has a name property
         var deviceNameAddress = AudioObjectPropertyAddress(mSelector: kAudioObjectPropertyName, mScope: kAudioDevicePropertyScopeOutput, mElement: kAudioObjectPropertyElementName)
@@ -139,9 +187,7 @@ class AudioDeviceManager {
         
         // get the stream configuration
         var inputStreamConfig = AudioBufferList()
-        guard AudioObjectGetPropertyData(id, &inputStreamConfigAddress, 0, nil, &inputStreamConfigAddressSize, &inputStreamConfig) == noErr else {
-            return nil
-        }
+        AudioObjectGetPropertyData(id, &inputStreamConfigAddress, 0, nil, &inputStreamConfigAddressSize, &inputStreamConfig)
         
         // if the number of buffers in the input scope is greater than 0, that
         // means it can act as an "input" device
@@ -163,16 +209,82 @@ class AudioDeviceManager {
         
         // get the stream configuration
         var outputStreamConfig = AudioBufferList()
-        guard AudioObjectGetPropertyData(id, &outputStreamConfigAddress, 0, nil, &outputStreamConfigAddressSize, &outputStreamConfig) == noErr else {
-            return nil
-        }
+        AudioObjectGetPropertyData(id, &outputStreamConfigAddress, 0, nil, &outputStreamConfigAddressSize, &outputStreamConfig)
         
         // if the number of buffers in the output scope is greater than 0, that
         // means it can act as an "output" device
         return outputStreamConfig.mNumberBuffers > 0
     }
     
-    // get the "default" input device
-    // get the "default" output device
-    // get the "default" system output device
+    // get the current input device
+    private func getCurrentInputDevice () -> AudioDeviceID? {
+        // get the current input device. This is listed as the "default" input device in
+        // the AudioSystemObject
+        var currentInputDeviceAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultInputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementName)
+        guard AudioObjectHasProperty(AudioObjectID(kAudioObjectSystemObject), &currentInputDeviceAddress) else {
+            return nil
+        }
+        
+        // get the size of the audio device ID
+        var currentInputDeviceAddressSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &currentInputDeviceAddress, 0, nil, &currentInputDeviceAddressSize) == noErr else {
+            return nil
+        }
+        
+        // get the device ID of the current input device
+        var currentInputDevice: AudioDeviceID = 0
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &currentInputDeviceAddress, 0, nil, &currentInputDeviceAddressSize, &currentInputDevice) == noErr else {
+            return nil
+        }
+        
+        return currentInputDevice
+    }
+    
+    // get the current output device
+    private func getCurrentOutputDevice () -> AudioDeviceID? {
+        // get the current output device. This is listed as the "default" output device in
+        // the AudioSystemObject
+        var currentOutputDeviceAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultOutputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementName)
+        guard AudioObjectHasProperty(AudioObjectID(kAudioObjectSystemObject), &currentOutputDeviceAddress) else {
+            return nil
+        }
+        
+        // get the size of the audio device ID
+        var currentOutputDeviceAddressSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &currentOutputDeviceAddress, 0, nil, &currentOutputDeviceAddressSize) == noErr else {
+            return nil
+        }
+        
+        // get the device ID of the current output device
+        var currentOutputDevice: AudioDeviceID = 0
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &currentOutputDeviceAddress, 0, nil, &currentOutputDeviceAddressSize, &currentOutputDevice) == noErr else {
+            return nil
+        }
+        
+        return currentOutputDevice
+    }
+    
+    // get the current system output device
+    private func getCurrentSystemOutputDevice () -> AudioDeviceID? {
+        // get the current system output device. This is listed as the "default" system output device in
+        // the AudioSystemObject
+        var currentSystemOutputDeviceAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultSystemOutputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementName)
+        guard AudioObjectHasProperty(AudioObjectID(kAudioObjectSystemObject), &currentSystemOutputDeviceAddress) else {
+            return nil
+        }
+        
+        // get the size of the audio device ID
+        var currentSystemOutputDeviceAddressSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &currentSystemOutputDeviceAddress, 0, nil, &currentSystemOutputDeviceAddressSize) == noErr else {
+            return nil
+        }
+        
+        // get the device ID of the current system output device
+        var currentSystemOutputDevice: AudioDeviceID = 0
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &currentSystemOutputDeviceAddress, 0, nil, &currentSystemOutputDeviceAddressSize, &currentSystemOutputDevice) == noErr else {
+            return nil
+        }
+        
+        return currentSystemOutputDevice
+    }
 }

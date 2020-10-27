@@ -28,6 +28,7 @@
 		9C0C8DB9253EA87100E40EDA /* SwitchAudioDevice */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwitchAudioDevice; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C0C8DBC253EA87100E40EDA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		9C0C8DC8253F97C900E40EDA /* AudioDevices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDevices.swift; sourceTree = "<group>"; };
+		9C5DEA2F2547BE9800D9AC6A /* SwitchAudioDevice.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SwitchAudioDevice.xctestplan; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 		9C0C8DBB253EA87100E40EDA /* SwitchAudioDevice */ = {
 			isa = PBXGroup;
 			children = (
+				9C5DEA2F2547BE9800D9AC6A /* SwitchAudioDevice.xctestplan */,
 				9C0C8DBC253EA87100E40EDA /* main.swift */,
 				9C0C8DC8253F97C900E40EDA /* AudioDevices.swift */,
 			);
