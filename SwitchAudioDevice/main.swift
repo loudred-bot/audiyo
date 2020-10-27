@@ -5,22 +5,6 @@
 //  Created by Blair Wilcox on 10/20/20.
 //
 
-/**
- * GOAL: Replicate the functionality of switchaudio-osx using
- * modern Apple APIs.
- *
- * TODO:
- * - [x] "-a" show all audio devices                                        --- audiyo list
- * - [ ] "-c" show current audio device                                  --- audiyo
- * - [ ] "-t {device}" show the type of the specified device    --- audiyo info {device}
- * - [ ] "-c" cycle to the next audio device                             --- audiyo next
- * - [ ] "-s {device}" set the audio device                              --- audiyo set {device}
- * - [ ] "-h" help                                                                     --- audiyo -h, audiyo --help
- *
- * NAME:
- * swad - SWitch Audio Device
- */
-
 
 /**
  * It looks like this isn't going to be straightforward. It seems like it's returning
@@ -38,16 +22,16 @@ let adm = AudioDeviceManager()
 struct AudiYo: ParsableCommand {
     static var configuration: CommandConfiguration = CommandConfiguration(
         commandName: "audiyo",
-        abstract: "Display and manage audio devices from the terminal",
-        subcommands: [List.self, Show.self],
-        defaultSubcommand: List.self
+        abstract: "Display and manage audio devices from the terminal.",
+        subcommands: [List.self, Show.self, Set.self],
+        defaultSubcommand: Show.self
 //        subcommands: [List.self, Show.self, Info.self, Set.self],
 //        defaultSubcommand: Show.self
     )
     
     struct List: ParsableCommand {
         static var configuration: CommandConfiguration = CommandConfiguration(
-            abstract:"List all of the devices on this computer."
+            abstract: "List all of the devices on this computer."
         )
         
         func run() {
@@ -62,12 +46,12 @@ struct AudiYo: ParsableCommand {
     
     struct Show: ParsableCommand {
         static var configuration: CommandConfiguration = CommandConfiguration(
-            abstract:"List the current audio devices in use."
+            abstract: "List the current audio devices in use."
         )
     
         @Option(
             name: [.customShort("t"), .long],
-            help: "The types of audio device to display. You can select either 'input', 'output', or 'system'. If this argument is not specified, this command will display all of the current audio devices"
+            help: "The types of audio device to display. You can select either 'input', 'output', or 'system'. If this argument is not specified, this command will display all of the current audio devices."
         )
         var types: [String] = ["input", "output", "system"]
         
@@ -91,39 +75,51 @@ struct AudiYo: ParsableCommand {
             }
         }
     }
+    
+    struct Set: ParsableCommand {
+        static var configuration: CommandConfiguration = CommandConfiguration(
+            abstract: "Change the audio device"
+        )
+        
+        @Option(
+            name: [.customShort("t"), .long],
+            help: "The type of the audio device to set. Either 'output', 'input', or 'system', If this value isn't specified, it will default to setting the output device."
+        )
+        var type: String = "output"
+        
+        @Argument(
+            help: "The device to set. This argument can be either the ID of the device or the name of the device."
+        )
+        var deviceID: String?
+        
+        func run() {
+            guard deviceID != nil else {
+                return
+            }
+            
+            // attempt to parse the deviceID into an AudioObjectID. If it can't
+            // be parsed, we'll consider it to be the device name
+            let parsedDeviceID = Int(deviceID!)
+            var device: Device?
+            if parsedDeviceID != nil {
+                device = adm.getDeviceByID(id: AudioObjectID(parsedDeviceID!))
+            } else {
+                device = adm.getDeviceByName(name: deviceID!)
+            }
+            
+            if device != nil {
+                if type == "output" {
+                    adm.setOutputDevice(device: device!)
+                }
+                if type == "input" {
+                    adm.setInputDevice(device: device!)
+                }
+                if type == "system" {
+                    adm.setSystemOutputDevice(device: device!)
+                }
+            }
+        }
+    }
 }
 
 AudiYo.main()
-
-//struct SwitchAudioDevice: ParsableCommand {
-//
-//    @Flag(name: [.customShort("a")], help: "show all audio devices.")
-//    var showAll = false
-//
-//    func run() {
-//        if showAll {
-//            let adm = AudioDeviceManager()
-//
-//            if let inDevice = adm.currentInputDevice {
-//                print("Current Input Device")
-//                print(inDevice.name)
-//                print("\tid: " + String(inDevice.id))
-//                print("\tinput: " + String(inDevice.input))
-//                print("\toutput: " + String(inDevice.output))
-//                print("")
-//            }
-//
-//            print("Devices:")
-//            for device in adm.devices {
-//                print(device.name)
-//                print("\tid: " + String(device.id))
-//                print("\tinput: " + String(device.input))
-//                print("\toutput: " + String(device.output))
-//            }
-//        } else {
-//            print("Hello, world!")
-//        }
-//    }
-//}
-//
-//SwitchAudioDevice.main()

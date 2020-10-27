@@ -6,41 +6,6 @@
 //
 
 /**
- * Creates a high-level API for interacting with CoreAudio audio devices. There are pros and cons
- * to this approach:
- *
- * Pros:
- * - functions can be smaller and more "functional"
- *
- * Cons:
- * - more duplicate code. Not able to reuse variables as much
- */
-
-
-/**
- * It's kind of difficult to picture all of these things in my head, so I'm thinking about
- * making classes/structs for the main CoreAudio Audio Objects.
- *
- * - [ ] AudioObject // may not need this
- * - [ ] AudioSystemObject
- *  - [ ] kAudioHardwarePropertyDevices
- *  - [ ] kAudioHardwarePropertyDefaultInputDevice
- *  - [ ] kAudioHardwarePropertyDefaultOutputDevice
- *  - [ ] kAudioHardwarePropertyDefaultSystemOutputDevice
- *  - [ ] kAudioHardwarePropertyPlugInList
- * - [ ] AudioDevice
- *  - **Scopes**
- *  - [ ] kAudioObjectPropertyScopeGlobal
- *  - [ ] kAudioObjectPropertyScopeInput
- *  - [ ] kAudioObjectPropertyScopeOutput
- *  - [ ] kAudioObjectPropertyScopePlayThrough
- * - **Properties**
- *  - [ ]
- * - [ ] AudioStream
- */
-
-
-/**
  * https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX10.15.sdk/System/Library/Frameworks/CoreAudio.framework/Versions/A/Headers/AudioHardware.h
  *
  */
@@ -129,6 +94,109 @@ class AudioDeviceManager {
         currentInputDeviceID = curInDevice
         currentOutputDeviceID = curOutDevice
         currentSystemOutputDeviceID = curSystemOutDevice
+    }
+    
+    // setters
+    
+    func setOutputDevice (device: Device) {
+        // get the address of the default output device
+        var deviceAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultOutputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+        guard AudioObjectHasProperty(AudioObjectID(kAudioObjectSystemObject), &deviceAddress) else {
+            return
+        }
+        
+        // make sure the output device is settable
+        var isSettable: DarwinBoolean = false
+        guard AudioObjectIsPropertySettable(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, &isSettable) == noErr else {
+            return
+        }
+        
+        // get the size of the output device data
+        var deviceAddressSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, &deviceAddressSize) == noErr else {
+            return
+        }
+        
+        // set the output device
+        var deviceID = device.id
+        guard AudioObjectSetPropertyData(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, deviceAddressSize, &deviceID) == noErr else {
+            return
+        }
+        
+        // update the output device
+        self.currentOutputDeviceID = device.id
+    }
+    
+    func setInputDevice (device: Device) {
+        // get the address of the default input device
+        var deviceAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultInputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+        guard AudioObjectHasProperty(AudioObjectID(kAudioObjectSystemObject), &deviceAddress) else {
+            return
+        }
+        
+        // make sure the input device is settable
+        var isSettable: DarwinBoolean = false
+        guard AudioObjectIsPropertySettable(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, &isSettable) == noErr else {
+            return
+        }
+        
+        // get the size of the input device data
+        var deviceAddressSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, &deviceAddressSize) == noErr else {
+            return
+        }
+        
+        // set the input device
+        var deviceID = device.id
+        guard AudioObjectSetPropertyData(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, deviceAddressSize, &deviceID) == noErr else {
+            return
+        }
+        
+        // update the output device
+        self.currentInputDeviceID = device.id
+    }
+    
+    func setSystemOutputDevice (device: Device) {
+        // get the address of the default system output device
+        var deviceAddress = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultSystemOutputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMaster)
+        guard AudioObjectHasProperty(AudioObjectID(kAudioObjectSystemObject), &deviceAddress) else {
+            return
+        }
+        
+        // make sure the system output device is settable
+        var isSettable: DarwinBoolean = false
+        guard AudioObjectIsPropertySettable(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, &isSettable) == noErr else {
+            return
+        }
+        
+        // get the size of the system output device data
+        var deviceAddressSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, &deviceAddressSize) == noErr else {
+            return
+        }
+        
+        // set the system output device
+        var deviceID = device.id
+        guard AudioObjectSetPropertyData(AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, deviceAddressSize, &deviceID) == noErr else {
+            return
+        }
+        
+        // update the system output device
+        self.currentSystemOutputDeviceID = device.id
+    }
+    
+    // functions for retrieving devices by some form of ID
+    
+    func getDeviceByName(name: String) -> Device? {
+        return self.devices.first {
+            $0.name == name
+        }
+    }
+    
+    func getDeviceByID(id: AudioObjectID) -> Device? {
+        return self.devices.first {
+            $0.id == id
+        }
     }
     
     // get the IDs of all the Audio Devices
